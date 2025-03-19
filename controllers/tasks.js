@@ -1,13 +1,13 @@
 const express = require("express");
 const verifyToken = require("../middleware/verify-token.js");
-const task = require("../models/task.js");
+const Task = require("../models/task.js");
 const router = express.Router();
 
 // POST - /tasks
 router.post("/", verifyToken, async (req, res) => {
   try {
     req.body.author = req.user._id;
-    const task = await task.create(req.body);
+    const task = await Task.create(req.body);
     task._doc.author = req.user;
     res.status(201).json(task);
   } catch (err) {
@@ -18,8 +18,7 @@ router.post("/", verifyToken, async (req, res) => {
 // GET - /tasks
 router.get("/", verifyToken, async (req, res) => {
   try {
-    const tasks = await task
-      .find({})
+    const tasks = await Task.find({})
       .populate("author")
       .sort({ createdAt: "desc" });
 
@@ -32,9 +31,10 @@ router.get("/", verifyToken, async (req, res) => {
 // GET - /tasks/:taskId
 router.get("/:taskId", verifyToken, async (req, res) => {
   try {
-    const task = await task
-      .findById(req.params.taskId)
-      .populate(["author", "comments.author"]);
+    const task = await Task.findById(req.params.taskId).populate([
+      "author",
+      "comments.author",
+    ]);
     res.status(200).json(task);
   } catch (err) {
     res.status(500).json({ err: err.message });
@@ -44,21 +44,21 @@ router.get("/:taskId", verifyToken, async (req, res) => {
 // PUT - /tasks/:taskId
 router.put("/:taskId", verifyToken, async (req, res) => {
   try {
-    const task = await task.findById(req.params.taskId);
+    const task = await Task.findById(req.params.taskId);
 
     if (!task.author.equals(req.user._id)) {
       return res.status(403).send("You are not allowed to do this!");
     }
 
-    const updatedtask = await task.findByIdAndUpdate(
+    const updatedTask = await Task.findByIdAndUpdate(
       req.params.taskId,
       req.body,
       { new: true }
     );
 
-    updatedtask._doc.author = req.user;
+    updatedTask._doc.author = req.user;
 
-    res.status(200).json(updatedtask);
+    res.status(200).json(updatedTask);
   } catch (err) {
     res.status(500).json({ err: err.message });
   }
@@ -67,14 +67,14 @@ router.put("/:taskId", verifyToken, async (req, res) => {
 // DELETE /tasks/:taskId
 router.delete("/:taskId", verifyToken, async (req, res) => {
   try {
-    const task = await task.findById(req.params.taskId);
+    const task = await Task.findById(req.params.taskId);
 
     if (!task.author.equals(req.user._id)) {
       return res.status(403).send("You are not allowed to do that!");
     }
 
-    const deletedtask = await task.findByIdAndDelete(req.params.taskId);
-    res.status(200).json(deletedtask);
+    const deletedTask = await Task.findByIdAndDelete(req.params.taskId);
+    res.status(200).json(deletedTask);
   } catch (err) {
     res.status(500).json({ err: err.message });
   }
@@ -84,7 +84,7 @@ router.delete("/:taskId", verifyToken, async (req, res) => {
 router.post("/:taskId/comments", verifyToken, async (req, res) => {
   try {
     req.body.author = req.user._id;
-    const task = await task.findById(req.params.taskId);
+    const task = await Task.findById(req.params.taskId);
     task.comments.push(req.body);
     await task.save();
 

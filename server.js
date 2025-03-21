@@ -15,11 +15,15 @@ const usersRouter = require("./controllers/users");
 const tasksRouter = require("./controllers/tasks");
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log(`Connected to MongoDB ${mongoose.connection.name}.`);
+  })
+  .catch(err => {
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1); // Exit process if the DB connection fails
+  });
 
-mongoose.connection.on("connected", () => {
-  console.log(`Connected to MongoDB ${mongoose.connection.name}.`);
-});
 
 // Middleware
 app.use(cors());
@@ -32,7 +36,7 @@ app.use("/auth", authRouter);
 app.use("/users", usersRouter);
 app.use("/tasks", tasksRouter);
 
-// Start the server and listen on port 3000
+// Start the server and listen on the specified PORT from the environment or 3000 locally
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

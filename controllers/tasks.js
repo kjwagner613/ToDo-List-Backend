@@ -3,7 +3,7 @@ const verifyToken = require("../middleware/verify-token.js");
 const Task = require("../models/task.js");
 const router = express.Router();
 
-// POST - /tasks
+
 router.post("/", verifyToken, async (req, res) => {
   try {
     req.body.author = req.user._id;
@@ -15,7 +15,7 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-// GET - /tasks
+
 router.get("/", verifyToken, async (req, res) => {
   try {
     const tasks = await Task.find({})
@@ -28,7 +28,7 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// GET - /tasks/:taskId
+
 router.get("/:taskId", verifyToken, async (req, res) => {
   try {
     const task = await Task.findById(req.params.taskId).populate([
@@ -41,7 +41,7 @@ router.get("/:taskId", verifyToken, async (req, res) => {
   }
 });
 
-// PUT - /tasks/:taskId
+
 router.put("/:taskId", verifyToken, async (req, res) => {
   try {
     const task = await Task.findById(req.params.taskId);
@@ -64,7 +64,7 @@ router.put("/:taskId", verifyToken, async (req, res) => {
   }
 });
 
-// DELETE /tasks/:taskId
+
 router.delete("/:taskId", verifyToken, async (req, res) => {
   try {
     const task = await Task.findById(req.params.taskId);
@@ -80,7 +80,7 @@ router.delete("/:taskId", verifyToken, async (req, res) => {
   }
 });
 
-// POST /tasks/:taskId/comments
+
 router.post("/:taskId/comments", verifyToken, async (req, res) => {
   try {
     req.body.author = req.user._id;
